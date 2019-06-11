@@ -10,3 +10,5 @@ Using random projections also allows you more sensible control of the number of 
 You can use more structured projections as an alternative to random projections.
 
 If you use f(x)=a.x x>=0, f(x)=b.x x<0 as the nonlinear activation fuction then the system can set a=b=1 if it wants to allow automatic ResNet like information pathways to develop, rather than you forcing such pathways on the system. 
+
+Discusion: https://discourse.processing.org/t/flaw-in-current-neural-networks/11512
