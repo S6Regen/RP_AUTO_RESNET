@@ -1,6 +1,5 @@
 # RP_AUTO_RESNET
 Under Construction:
-https://youtu.be/5w0Vzjf0b5M
 
 A traditional neural network has in each layer many weighted sums operating off a single vector. That leaves you trying to find multiple worthwhile and different separating hyperplanes, perhaps not such an easy task. The biological brain does not have such a problem as there are far more nonlinarities involved and it is not structured into regualar repeating layers.   
 
