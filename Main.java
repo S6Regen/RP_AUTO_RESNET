@@ -16,6 +16,7 @@ public class Main {
   static RPN child;
   static int count;
   static float[][] img;
+  static float[] work;
   
   public static void main(String[] args){   
      DataInputStream dis=new DataInputStream(Main.class.getResourceAsStream("imgdata.dat")); // load image data
@@ -89,7 +90,7 @@ public class Main {
       while(true){ // depth loop
         zero(result);
         for(int j=0;j<density;j++){  // density loop
-          for(int k=0;k<vecLen;k++){     // multiply with weights
+          for(int k=0;k<vecLen;k++){     // multiply by weights
             workB[k]=workA[k]*weights[wtIndex++]; 
           }  
           whtRaw(workB); // Weight premultiply + Walsh Hadamard transform = Spinner projection
@@ -132,11 +133,11 @@ public class Main {
       float sum = 0f;
       int n=x.length;
       for (int i = 0; i < n; i++) {
-        sum += x[i] * x[i];
+        sum += y[i] * y[i];
       }
       float adj = scale/ (float) Math.sqrt((sum/n) + 1e-20f);
       for(int i=0;i<n;i++){
-        y[i]=x[i]*adj;
+        x[i]=y[i]*adj;
       }
     }  
      
