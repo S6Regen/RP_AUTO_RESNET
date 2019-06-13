@@ -1,7 +1,6 @@
 import javax.swing.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.io.*;
 
 public class Main {
@@ -11,12 +10,12 @@ public class Main {
   static JButton recallBtn;
   static JLabel costLb;
   static Thread t;
-  static AtomicInteger parentCost=new AtomicInteger();
-  static RPN parent;
-  static RPN child;
+  static float parentCost=Float.POSITIVE_INFINITY;
+  static RPN parent=new RPN(4096,3,5);
+  static RPN child=new RPN(4096,3,5);
   static int count;
   static float[][] img;
-  static float[] work;
+  static float[] work=new float[4096];
   
   public static void main(String[] args){   
      DataInputStream dis=new DataInputStream(Main.class.getResourceAsStream("imgdata.dat")); // load image data
@@ -54,16 +53,65 @@ public class Main {
      f.setVisible(true);
      ActionListener aL=new ActionListener() {
        public void actionPerformed(ActionEvent e) {
-          System.out.println(e);
-          
-        
+         if(e.getSource()==trainBtn){
+           if(t==null){
+             t=new Thread(){
+               public void run(){
+                 while(!Thread.interrupted()){
+                   int n=parent.weights.length;
+                   System.arraycopy(parent.weights,0,child.weights,0,n); //copy parent to child
+                   for(int i=0;i<25;i++){  // do some mutations
+                      int r=(int)(n*Math.random());  // random location in weights to mutate.
+                      float m=(float)Math.exp(-20*Math.random()); // mutation
+                      if(Math.random()<0.5) m=-m;    //  random sign flip
+                      float v=child.weights[r]+m;
+                      if((v>1f) || (v<-1f)) continue;  // if out of bounds leave unchanged
+                      child.weights[r]=v;
+                   }   // end child mutations
+                   float childCost=0f;
+                   for(int i=0;i<count;i++){  // find the cost of the child
+                     child.recall(work,img[i]);
+                     for(int j=0;j<work.length;j++){
+                       float e=work[j]-img[i][j];
+                       childCost+=e*e;
+                     }    
+                   }  
+                   if(childCost<parentCost){ //child is better than parent
+                     System.arraycopy(child.weights,0,parent.weights,0,n);
+                     parentCost=childCost;     
+                     costLb.setText(Float.toString(parentCost));
+                     costLb.repaint();
+                   }  
+                 }
+               }
+             };
+             recallBtn.setEnabled(false);
+             trainBtn.setText("Stop Training");
+             t.start();
+           }else{
+             t.interrupt();
+             try{
+             t.join();
+             }catch(Exception f){};
+             t=null;
+             recallBtn.setEnabled(true);
+             trainBtn.setText("Train");
+           }  
+         }else{ // else it must be the recall button
+           if(t==null){
+             
+           }else{
+             
+             
+           }   
+         }  
        }
      };
      trainBtn.addActionListener(aL);
      recallBtn.addActionListener(aL);
   }  
   
-  class RPN {
+ static class RPN {
      int vecLen;
      int density;
      int depth;
