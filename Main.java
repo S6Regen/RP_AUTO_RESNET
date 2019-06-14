@@ -9,6 +9,7 @@ public class Main {
   static JButton trainBtn;
   static JButton recallBtn;
   static JLabel costLb;
+  static JLabel imgLb;
   static Thread t;
   static float parentCost=Float.POSITIVE_INFINITY;
   static RPN parent=new RPN(4096,3,5);
@@ -47,7 +48,7 @@ public class Main {
      costLb.setBounds(55,303,200,30);
      f.add(costLb);   
      buffer=new BufferedImage(256,256,BufferedImage.TYPE_INT_RGB);
-     JLabel imgLb=new JLabel(new ImageIcon(buffer));
+     imgLb=new JLabel(new ImageIcon(buffer));
      imgLb.setBounds(5,5,256,256);
      f.add(imgLb);
      f.setVisible(true);
@@ -78,9 +79,9 @@ public class Main {
                    }  
                    if(childCost<parentCost){ //child is better than parent
                      System.arraycopy(child.weights,0,parent.weights,0,n);
-                     parentCost=childCost;     
-                     costLb.setText(Float.toString(parentCost));
-                     costLb.repaint();
+                     synchronized(Main.class){
+                       parentCost=childCost;     
+                     }
                    }  
                  }
                }
@@ -109,6 +110,29 @@ public class Main {
      };
      trainBtn.addActionListener(aL);
      recallBtn.addActionListener(aL);
+     Timer time=new Timer(200,new ActionListener(){
+       public void actionPerformed(ActionEvent e) {
+         synchronized(Main.class){
+           costLb.setText(Float.toString(parentCost)); 
+         }
+         int idx=0;
+         for(int i=0;i<256;i+=8){
+           for(int j=0;j<256;j+=8){
+             int r=Math.max(Math.min(Math.round(127.5f*work[idx++]+127.5f),255),0);
+             int g=Math.max(Math.min(Math.round(127.5f*work[idx++]+127.5f),255),0);
+             int b=Math.max(Math.min(Math.round(127.5f*work[idx++]+127.5f),255),0);
+             int clr=r|(g<<8)|(b<<16);
+             for(int x=j;x<j+8;x++){
+               for(int y=i;y<i+8;y++){
+                 buffer.setRGB(x,y,clr);
+               }
+             }  
+           }
+         }  
+         imgLb.repaint();
+       }  
+     });
+     time.start();
   }  
   
  static class RPN {
@@ -127,8 +151,10 @@ public class Main {
        sc=1f/(float)Math.sqrt(vecLen);
        weights=new float[3*vecLen*density*depth];
        workA=new float[vecLen];
-       workB=new float[vecLen];
-    
+       workB=new float[vecLen];  
+       for(int i=0;i<weights.length;i++){
+         weights[i]=2f*(float)Math.random()-1f;
+       }
     }
     
     void recall(float[] result,float[] input){
