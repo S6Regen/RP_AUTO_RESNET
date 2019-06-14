@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-
+// Remind me never to use Java again, it's boilerplate code hell.
 public class Main {
 
   static BufferedImage buffer;
@@ -100,17 +100,38 @@ public class Main {
            }  
          }else{ // else it must be the recall button
            if(t==null){
-             
+              t=new Thread(){
+               public void run(){
+                 int ct=0;
+                 while(!Thread.interrupted()){
+                   parent.recall(work,img[ct++]);
+                   if(ct>=count) ct=0;
+                   try{
+                     Thread.sleep(2000);
+                   }catch(Exception re){
+                     break;
+                   }  
+                 }
+               }
+              };
+              trainBtn.setEnabled(false);
+              recallBtn.setText("Stop Recall");
+              t.start();       
            }else{
-             
-             
+             t.interrupt();
+             try{
+               t.join();
+             }catch(Exception f){};
+             t=null;
+             trainBtn.setEnabled(true);
+             recallBtn.setText("Recall");
            }   
          }  
        }
      };
      trainBtn.addActionListener(aL);
      recallBtn.addActionListener(aL);
-     Timer time=new Timer(200,new ActionListener(){
+     Timer time=new Timer(400,new ActionListener(){
        public void actionPerformed(ActionEvent e) {
          synchronized(Main.class){
            costLb.setText(Float.toString(parentCost)); 
@@ -121,7 +142,8 @@ public class Main {
              int r=Math.max(Math.min(Math.round(127.5f*work[idx++]+127.5f),255),0);
              int g=Math.max(Math.min(Math.round(127.5f*work[idx++]+127.5f),255),0);
              int b=Math.max(Math.min(Math.round(127.5f*work[idx++]+127.5f),255),0);
-             int clr=r|(g<<8)|(b<<16);
+             idx++;
+             int clr=b|(g<<8)|(r<<16);
              for(int x=j;x<j+8;x++){
                for(int y=i;y<i+8;y++){
                  buffer.setRGB(x,y,clr);
