@@ -274,18 +274,98 @@ switchlp:
     ret
 end asm
 end sub
+
+' switch slope at zero, x to the power of 1.5 
+sub switchp15 naked(addto as single ptr,x as single ptr,wts as single ptr,n as ulongint)
+asm
+	xorps xmm0,xmm0  'zero xmm0
+	mov eax,0x7fffffff
+	movd xmm9,eax
+	mov eax,0x3f800000
+	movd xmm10,eax
+	shufps xmm9,xmm9,0
+	shufps xmm10,xmm10,0
+	.align 16
+switch15lp:
+	movups xmm12,[rsi]	'x values
+	movups xmm13,[rsi+16]
+	movups xmm14,[rsi+32]
+	movups xmm15,[rsi+48]
+	movups xmm5,[rdx]   'wt block 1
+	movups xmm6,[rdx+16]
+	movups xmm7,[rdx+32]
+	movups xmm8,[rdx+48]
+	sub rcx,16
+	movaps xmm1,xmm12	'copy x values
+	movaps xmm2,xmm13
+	movaps xmm3,xmm14
+	movaps xmm4,xmm15
+	cmpltps xmm1,xmm0	'masks
+	cmpltps xmm2,xmm0
+	cmpltps xmm3,xmm0
+	cmpltps xmm4,xmm0
+	andps xmm5,xmm1 	'wt block 1 and mask
+	andps xmm6,xmm2
+	andps xmm7,xmm3
+	andps xmm8,xmm4
+	andnps xmm1,[rdx+64] 'wt block 2 and not mask
+	andnps xmm2,[rdx+80]
+	andnps xmm3,[rdx+96]
+	andnps xmm4,[rdx+112]
+    orps xmm1,xmm5
+    orps xmm2,xmm6
+    orps xmm3,xmm7
+    orps xmm4,xmm8
+    mulps xmm1,xmm12
+    mulps xmm2,xmm13
+    mulps xmm3,xmm14
+    mulps xmm4,xmm15
+    pand xmm12,xmm9
+    pand xmm13,xmm9
+    pand xmm14,xmm9
+    pand xmm15,xmm9
+    paddd xmm12,xmm10
+    paddd xmm13,xmm10
+    paddd xmm14,xmm10
+    paddd xmm15,xmm10
+    psrld xmm12,1
+    psrld xmm13,1
+    psrld xmm14,1
+    psrld xmm15,1
+    mulps xmm1,xmm12
+    mulps xmm2,xmm13
+    mulps xmm3,xmm14
+    mulps xmm4,xmm15
+    
+    addps xmm1,[rdi]
+    addps xmm2,[rdi+16]
+    addps xmm3,[rdi+32]
+    addps xmm4,[rdi+48]
+    lea rsi,[rsi+64]
+    lea rdx,[rdx+128]
+    movups [rdi],xmm1
+    movups [rdi+16],xmm2
+    movups [rdi+32],xmm3
+    movups [rdi+48],xmm4
+    lea rdi,[rdi+64]
+    jnz switch15lp
+    ret
+end asm
+end sub
 /'
-dim as single r(31),x(65535),w(63)
+dim as single x(63),y(63),w(127)
+for i as ulong=0 to ubound(w)
+w(i)=-1
+next
+
 for i as ulong=0 to ubound(x)
-x(i)=1
+x(i)=-i
 next
-dim as single q
-var t1=Timer
-for i as ulong=0 to 999
-zero(@x(0),65536)
+switchp15(@y(0),@x(0),@w(0),64)
+
+for i as ulong=0 to ubound(x)
+ print i,y(i),i^1.5
 next
-var t2=Timer
-print q,1000/(t2-t1)
 getkey
 '/
 
