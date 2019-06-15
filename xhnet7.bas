@@ -155,7 +155,7 @@ presentData(@imgData(0),100,100,edge)
 dim as single work(size-1),parentCost=1!/0!
 dim as boolean te,re,ne
 dim as mutator mut
-mut.init(20,25)
+mut.init(25,25)
 dim as xhnet net
 net.init(size,2,5)
 if fileExists(NET_FILE)  then net.load(NET_FILE)
@@ -181,7 +181,10 @@ do
     re=false
     ne=false
   end if 
-  if k=chr(27) then exit do
+  if k=chr(27) then 
+    net.save(NET_FILE)
+	exit do
+  end if	
   if not (te or re or ne) then
    cls
    draw string (5,20),"T to Train, R to Recall, S to Stop, Esc to Quit"
