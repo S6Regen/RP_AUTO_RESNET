@@ -1,5 +1,6 @@
 # RP_AUTO_RESNET
 Finished until GPU hardware becomes available.
+
 A traditional neural network has in each layer many weighted sums operating off a single vector. That leaves you trying to find multiple worthwhile and different separating hyperplanes, perhaps not such an easy task. The biological brain does not have such a problem as there are far more nonlinarities involved and it is not structured into regualar repeating layers.   
 
 An alternative is to use (vector to vector) random projections to create multiple different windows on the single vector, resulting in an increase in dimension, then apply a nonlinear function to all the random projection elements. Then provide each weighed sum with a different nonlinear window on the single vector.  A neuron then is: random projection, nonlinearity, weighed sum.
