@@ -13,3 +13,5 @@ If you use f(x)=a.x x>=0, f(x)=b.x x<0 as the nonlinear activation fuction then 
 Discussion: https://discourse.processing.org/t/flaw-in-current-neural-networks/11512
 
 If you take the correlation machine view of a neural network, the conventional type can only construct correlations between n elements per layer, the equivelent random projection/spinner neural network can construct correlations between n^2 elements per layer, with no increase in the number of weights required. That is likely to be more expressive and compact.
+
+You may not wish to use random projections or spinners because they become the rate limiting step. You can use any parameterized non-linear function that you can make different, applying each different one to each input term of each weighted sum.  And that parameter could be as simple as a (random if you like) bias term to a standard nonlinear activation function. 
