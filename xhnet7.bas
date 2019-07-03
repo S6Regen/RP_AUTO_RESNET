@@ -47,7 +47,7 @@ sub xhnet.recall(result as single ptr,inVec as single ptr)
 			switch(result,wb,wts,veclen):wts+=2*veclen
 		next
 		i+=1
-		if i=density then exit do
+			if i=depth then exit do
 		scale(wa,result,sc,veclen)
 	loop
 end sub
